@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 World Cup Predictor 🏆</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0a0a2e 0%, #1a1a4e 50%, #0d2b0d 100%);
+    min-height: 100vh;
+    color: #fff;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 4px;
+    background: linear-gradient(90deg, #c9a84c, #ffe066, #c9a84c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1px solid #444;
+    background: rgba(255,255,255,0.05);
+    color: #ccc;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, #c9a84c, #ffe066);
+    color: #000;
+    font-weight: bold;
+    border-color: transparent;
+  }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* GROUPS */
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .group-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .group-title {
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #ffe066;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .team-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.88rem;
+  }
+  .team-row:last-child { border-bottom: none; }
+  .flag { font-size: 1.2rem; }
+  .host-badge {
+    font-size: 0.6rem;
+    background: #c9a84c;
+    color: #000;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-left: auto;
+  }
+
+  /* PREDICTOR */
+  .predictor-intro {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #bbb;
+    font-size: 0.9rem;
+  }
+  .round-label {
+    text-align: center;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: #ffe066;
+    font-weight: bold;
+    margin: 16px 0 10px;
+    text-transform: uppercase;
+  }
+  .bracket-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .matchup {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 12px;
+    min-width: 200px;
+    text-align: center;
+  }
+  .matchup-title {
+    font-size: 0.65rem;
+    color: #888;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .pick-btn {
+    display: block;
+    width: 100%;
+    padding: 7px 10px;
+    margin: 4px 0;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04);
+    color: #ddd;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.15s;
+    text-align: left;
+  }
+  .pick-btn:hover { background: rgba(255,255,255,0.12); }
+  .pick-btn.selected {
+    background: linear-gradient(135deg, rgba(201,168,76,0.3), rgba(255,224,102,0.3));
+    border-color: #ffe066;
+    color: #fff;
+    font-weight: bold;
+  }
+  .pick-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .champion-display {
+    text-align: center;
+    margin: 20px auto;
+    max-width: 340px;
+  }
+  .champion-box {
+    background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(255,224,102,0.1));
+    border: 2px solid #ffe066;
+    border-radius: 16px;
+    padding: 20px;
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+  .champion-label {
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    color: #ffe066;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .share-btn {
+    margin-top: 14px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #c9a84c, #ffe066);
+    color: #000;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .share-btn:hover { opacity: 0.85; }
+  .reset-btn {
+    margin-top: 8px;
+    padding: 7px 18px;
+    background: transparent;
+    color: #888;
+    border: 1px solid #444;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* FUN FACTS */
+  .fact-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #ddd;
+  }
+  .fact-card .fact-num {
+    color: #ffe066;
+    font-weight: bold;
+    font-size: 1rem;
+    margin-right: 6px;
+  }
+
+  .copied-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffe066;
+    color: #000;
+    padding: 10px 22px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .copied-toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<h1>⚽ 2026 WORLD CUP ⚽</h1>
+<p class="subtitle">USA · Canada · Mexico &nbsp;|&nbsp; June 11 – July 19, 2026 &nbsp;|&nbsp; 48 Teams</p>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('groups')">📋 Groups</button>
+  <button class="tab" onclick="showTab('predictor')">🏆 Pick Your Champion</button>
+  <button class="tab" onclick="showTab('facts')">⚡ Fun Facts</button>
+</div>
+
+<div id="groups" class="section active">
+  <div class="groups-grid" id="groupsGrid"></div>
+</div>
+
+<div id="predictor" class="section">
+  <p class="predictor-intro">Pick the winner from each group of contenders to crown your 2026 World Cup Champion!</p>
+  <div id="bracketArea"></div>
+  <div class="champion-display" id="championDisplay" style="display:none"></div>
+  <button class="reset-btn" onclick="resetPicks()">↺ Reset Picks</button>
+</div>
+
+<div id="facts" class="section">
+  <div id="factsArea"></div>
+</div>
+
+<div class="copied-toast" id="toast">📋 Copied to clipboard!</div>
+
+<script>
+const GROUPS = {
+  A: { teams: [
+    {name:"Mexico", flag:"🇲🇽", host:true}, {name:"South Africa", flag:"🇿🇦"}, {name:"South Korea", flag:"🇰🇷"}, {name:"Czechia", flag:"🇨🇿"}
+  ]},
+  B: { teams: [
+    {name:"Canada", flag:"🇨🇦", host:true}, {name:"Bosnia & Herz.", flag:"🇧🇦"}, {name:"Qatar", flag:"🇶🇦"}, {name:"Switzerland", flag:"🇨🇭"}
+  ]},
+  C: { teams: [
+    {name:"Brazil", flag:"🇧🇷"}, {name:"Scotland", flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"}, {name:"Morocco", flag:"🇲🇦"}, {name:"Haiti", flag:"🇭🇹"}
+  ]},
+  D: { teams: [
+    {name:"USA", flag:"🇺🇸", host:true}, {name:"Paraguay", flag:"🇵🇾"}, {name:"Australia", flag:"🇦🇺"}, {name:"Turkey", flag:"🇹🇷"}
+  ]},
+  E: { teams: [
+    {name:"Germany", flag:"🇩🇪"}, {name:"Ecuador", flag:"🇪🇨"}, {name:"Ivory Coast", flag:"🇨🇮"}, {name:"Curaçao", flag:"🇨🇼"}
+  ]},
+  F: { teams: [
+    {name:"Japan", flag:"🇯🇵"}, {name:"Netherlands", flag:"🇳🇱"}, {name:"Tunisia", flag:"🇹🇳"}, {name:"Sweden", flag:"🇸🇪"}
+  ]},
+  G: { teams: [
+    {name:"Belgium", flag:"🇧🇪"}, {name:"Egypt", flag:"🇪🇬"}, {name:"Iran", flag:"🇮🇷"}, {name:"New Zealand", flag:"🇳🇿"}
+  ]},
+  H: { teams: [
+    {name:"Spain", flag:"🇪🇸"}, {name:"Uruguay", flag:"🇺🇾"}, {name:"Saudi Arabia", flag:"🇸🇦"}, {name:"Cape Verde", flag:"🇨🇻"}
+  ]},
+  I: { teams: [
+    {name:"France", flag:"🇫🇷"}, {name:"Norway", flag:"🇳🇴"}, {name:"Senegal", flag:"🇸🇳"}, {name:"Iraq", flag:"🇮🇶"}
+  ]},
+  J: { teams: [
+    {name:"Argentina", flag:"🇦🇷"}, {name:"Chile", flag:"🇨🇱"}, {name:"Algeria", flag:"🇩🇿"}, {name:"Jordan", flag:"🇯🇴"}
+  ]},
+  K: { teams: [
+    {name:"Portugal", flag:"🇵🇹"}, {name:"Colombia", flag:"🇨🇴"}, {name:"Uzbekistan", flag:"🇺🇿"}, {name:"Panama", flag:"🇵🇦"}
+  ]},
+  L: { teams: [
+    {name:"England", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"}, {name:"Croatia", flag:"🇭🇷"}, {name:"Austria", flag:"🇦🇹"}, {name:"Ghana", flag:"🇬🇭"}
+  ]}
+};
+
+// Build groups view
+const groupsGrid = document.getElementById('groupsGrid');
+for (const [letter, data] of Object.entries(GROUPS)) {
+  const card = document.createElement('div');
+  card.className = 'group-card';
+  card.innerHTML = `<div class="group-title">Group ${letter}</div>` +
+    data.teams.map(t => `
+      <div class="team-row">
+        <span class="flag">${t.flag}</span>
+        <span>${t.name}</span>
+        ${t.host ? '<span class="host-badge">HOST</span>' : ''}
+      </div>`).join('');
+  groupsGrid.appendChild(card);
+}
+
+// PREDICTOR — simplified 4-round picks from group winners
+// We'll have users pick from 8 "pods" of favorites to narrow to champion
+const PODS = [
+  { label: "Pod 1 – Americas", teams: [
+    {name:"Argentina", flag:"🇦🇷"}, {name:"Brazil", flag:"🇧🇷"}, {name:"USA", flag:"🇺🇸"}, {name:"Mexico", flag:"🇲🇽"}
+  ]},
+  { label: "Pod 2 – Europe A", teams: [
+    {name:"France", flag:"🇫🇷"}, {name:"Spain", flag:"🇪🇸"}, {name:"England", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"}, {name:"Germany", flag:"🇩🇪"}
+  ]},
+  { label: "Pod 3 – Europe B", teams: [
+    {name:"Portugal", flag:"🇵🇹"}, {name:"Netherlands", flag:"🇳🇱"}, {name:"Belgium", flag:"🇧🇪"}, {name:"Croatia", flag:"🇭🇷"}
+  ]},
+  { label: "Pod 4 – Rest of World", teams: [
+    {name:"Morocco", flag:"🇲🇦"}, {name:"Japan", flag:"🇯🇵"}, {name:"South Korea", flag:"🇰🇷"}, {name:"Senegal", flag:"🇸🇳"}
+  ]}
+];
+
+let picks = { pod: [null, null, null, null], semi: [null, null], final: null };
+
+function buildBracket() {
+  const area = document.getElementById('bracketArea');
+  area.innerHTML = '';
+
+  // Pod picks
+  area.innerHTML += `<div class="round-label">⚽ Quarter Picks — Who advances from each pod?</div>`;
+  const row1 = document.createElement('div');
+  row1.className = 'bracket-row';
+  PODS.forEach((pod, i) => {
+    const card = document.createElement('div');
+    card.className = 'matchup';
+    card.innerHTML = `<div class="matchup-title">${pod.label}</div>` +
+      pod.teams.map(t => `
+        <button class="pick-btn ${picks.pod[i]?.name === t.name ? 'selected' : ''}"
+          onclick="pickPod(${i}, '${t.name}', '${t.flag}')">
+          ${t.flag} ${t.name}
+        </button>`).join('');
+    row1.appendChild(card);
+  });
+  area.appendChild(row1);
+
+  // Semi picks
+  if (picks.pod.every(p => p !== null)) {
+    area.innerHTML += `<div class="round-label">🔥 Semis — Pick your finalists</div>`;
+    const row2 = document.createElement('div');
+    row2.className = 'bracket-row';
+    [[0,1],[2,3]].forEach(([a,b], i) => {
+      const card = document.createElement('div');
+      card.className = 'matchup';
+      card.innerHTML = `<div class="matchup-title">Semi ${i+1}</div>` +
+        [picks.pod[a], picks.pod[b]].map(t => `
+          <button class="pick-btn ${picks.semi[i]?.name === t.name ? 'selected' : ''}"
+            onclick="pickSemi(${i}, '${t.name}', '${t.flag}')">
+            ${t.flag} ${t.name}
+          </button>`).join('');
+      row2.appendChild(card);
+    });
+    area.appendChild(row2);
+  }
+
+  // Final
+  if (picks.semi.every(p => p !== null)) {
+    area.innerHTML += `<div class="round-label">🏆 THE FINAL — Pick your champion!</div>`;
+    const row3 = document.createElement('div');
+    row3.className = 'bracket-row';
+    const card = document.createElement('div');
+    card.className = 'matchup';
+    card.innerHTML = `<div class="matchup-title">World Cup Final</div>` +
+      picks.semi.map(t => `
+        <button class="pick-btn ${picks.final?.name === t.name ? 'selected' : ''}"
+          onclick="pickFinal('${t.name}', '${t.flag}')">
+          ${t.flag} ${t.name}
+        </button>`).join('');
+    row3.appendChild(card);
+    area.appendChild(row3);
+  }
+
+  // Champion
+  const champDiv = document.getElementById('championDisplay');
+  if (picks.final) {
+    champDiv.style.display = 'block';
+    champDiv.innerHTML = `
+      <div class="champion-box">
+        <div class="champion-label">🏆 My 2026 Champion</div>
+        <div style="font-size:2.5rem">${picks.final.flag}</div>
+        <div style="margin-top:6px">${picks.final.name}</div>
+      </div>
+      <button class="share-btn" onclick="shareResult()">📤 Share My Pick</button>`;
+  } else {
+    champDiv.style.display = 'none';
+  }
+}
+
+function pickPod(i, name, flag) {
+  picks.pod[i] = {name, flag};
+  // Reset downstream
+  picks.semi = [null, null];
+  picks.final = null;
+  buildBracket();
+}
+function pickSemi(i, name, flag) {
+  picks.semi[i] = {name, flag};
+  picks.final = null;
+  buildBracket();
+}
+function pickFinal(name, flag) {
+  picks.final = {name, flag};
+  buildBracket();
+}
+function resetPicks() {
+  picks = { pod: [null, null, null, null], semi: [null, null], final: null };
+  buildBracket();
+}
+function shareResult() {
+  if (!picks.final) return;
+  const txt = `🏆 My 2026 FIFA World Cup pick: ${picks.final.flag} ${picks.final.name} wins it all!\n\n` +
+    `Semi-finalists: ${picks.semi.map(t=>t.flag+' '+t.name).join(' vs ')}\n\nMake your pick at 2026 World Cup Predictor`;
+  navigator.clipboard.writeText(txt).then(() => showToast());
+}
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+buildBracket();
+
+// FUN FACTS
+const facts = [
+  "This is the first World Cup with 48 teams — 16 more than 2022 in Qatar.",
+  "Three countries co-host for the first time ever: USA, Canada, and Mexico.",
+  "The opening match kicked off TODAY (June 11) — Mexico vs. South Africa at the iconic Estadio Azteca.",
+  "The final will be held at MetLife Stadium (New York/New Jersey) on July 19.",
+  "104 total matches will be played across 39 days in 16 host cities.",
+  "Argentina enter as defending champions after their dramatic 2022 penalty shootout win over France.",
+  "The top 2 from each of 12 groups advance, plus the 8 best 3rd-place teams = 32 knockout teams.",
+  "Curaçao made history qualifying — with just 156,000 people, the smallest nation ever at a World Cup.",
+  "The USA plays their first match tomorrow (June 12) against Paraguay at 6 PM ET.",
+  "Spain enters as the #1 FIFA-ranked team in the world going into this tournament.",
+  "Germany drew the easiest group on average FIFA ranking — Group E with Ecuador, Ivory Coast & Curaçao.",
+  "The Round of 16 takes place July 4–7, giving Americans a patriotic knockout weekend.",
+];
+
+const factsArea = document.getElementById('factsArea');
+facts.forEach((f, i) => {
+  const d = document.createElement('div');
+  d.className = 'fact-card';
+  d.innerHTML = `<span class="fact-num">${i+1}.</span>${f}`;
+  factsArea.appendChild(d);
+});
+
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
